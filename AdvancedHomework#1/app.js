@@ -24,33 +24,41 @@ function fetchStudents() {
     }) //All students with an average grade higher than 3
     .then((students) => {
       const averageGradeHigherThanThree = students.filter(
-        (student) => student.averageGrade >= 3
+        (student) => student.averageGrade > 3
       ); // All female student names with an average grade of 5
-      const femaleAverageGradeFive = students.filter(
-        (student) => student.gender === "Female" && student.averageGrade >= 5
-      ); // All male student full names who live in Skopje and are over 18 years old
-      const maleFullNames = students.filter(
-        (student) =>
-          student.gender === "Male" &&
-          student.city === "Skopje" &&
-          student.age >= 18
-      ); // The average grades of all female students over the age of 24
-      const femalesOverTwentyFour = students.filter(
-        (student) => student.gender === "Female" && student.age >= 24
-      );
-      const sum = students.reduce((acc, num) => {
-        return acc + num.averageGrade; // treba da gi soberam? neznam
-      }, 0); // All male students with a name starting with B and average grade over 2
+      const femaleAverageGradeFive = students
+        .filter(
+          (student) => student.gender === "Female" && student.averageGrade >= 5
+        )
+        .map((student) => `${student.firstName} ${student.lastName}`);
+
+      // All male student full names who live in Skopje and are over 18 years old
+      const maleFullNames = students
+        .filter(
+          (student) =>
+            student.gender === "Male" &&
+            student.city === "Skopje" &&
+            student.age > 18
+        )
+        .map((student) => `${student.firstName} ${student.lastName}`);
+
+      // The average grades of all female students over the age of 24
+      const femalesOverTwentyFour = students
+        .filter((student) => student.gender === "Female" && student.age > 24)
+        .map((student) => `${student.averageGrade}`);
+
+      // All male students with a name starting with B and average grade over 2
       const allMaleStudents = students.filter(
         (student) =>
-          student.firstName.startsWith("B") && student.averageGrade > 2
+          student.firstName.startsWith("B") &&
+          student.averageGrade > 2 &&
+          student.gender === "Male"
       );
       console.log(
         averageGradeHigherThanThree,
         femaleAverageGradeFive,
         maleFullNames,
         femalesOverTwentyFour,
-        sum,
         allMaleStudents
       );
       renderStudentsList(
