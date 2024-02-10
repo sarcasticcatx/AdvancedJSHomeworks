@@ -1,125 +1,162 @@
-//need to correct it
+//just an updated version od chas
 
-console.log("im working");
+console.log("are we there yet?");
 
-const container = document.querySelector(".container");
+const containerEl = document.querySelector(".containerz");
 
 const STUDENTS_URL =
   "https://raw.githubusercontent.com/sedc-codecademy/skwd9-04-ajs/main/Samples/students_v2.json";
 
-const fetchStudentsList = async () => {
+const fetchStudents = async (url) => {
   try {
-    const response = await fetch(
-      "https://raw.githubusercontent.com/sedc-codecademy/skwd9-04-ajs/main/Samples/students_v2.json"
-    );
-    const studentData = await response.json();
-    // console.log(studentData);
-
-    studentsInfo(studentData);
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    const data = await res.json();
+    return data;
   } catch (error) {
-    console.log(error);
-    throw new Error("Smth went wrong");
+    console.error("There was a problem with the fetch operation:", error);
   }
 };
 
-const studentsInfo = (studentData) => {
-  //Show the average age and average grade of all students combined
-  let brojacAge = 0;
-  let brojacGrade = 0;
-  studentData.map((student) => {
-    brojacAge += student.age;
-    brojacGrade += student.averageGrade;
-  });
-  brojacAge /= studentData.length;
-  brojacGrade /= studentData.length;
-  console.log("Prosek od godini:", brojacAge);
-  console.log("Prosek od oceni:", brojacGrade);
+const makeStudentHtml = (student) => {
+  return `
+      <div class="student-info">
+        <h4>${student.id}. ${student.firstName} ${student.lastName}</h4>
+        <p>City: ${student.city}</p>
+        <p>Gender: ${student.gender}</p>
+        <p>Average Grade: ${student.averageGrade}</p>
+        <p>Age: ${student.age}</p>
+      </div>   
+
+`;
+};
+
+const renderStudentInfo = (container, studentData) => {
+  // console.log(studentData);
+  // 1. Show the average age and average grade of all students combined
+
+  const allAverageAge =
+    studentData.reduce((acc, student) => acc + student.age, 0) /
+    studentData.length;
+  const allAverageGrade =
+    studentData.reduce((acc, student) => acc + student.averageGrade, 0) /
+    studentData.length;
+
+  // console.log("Prosek od godini:", allAverageAge);
+  // console.log("Prosek od oceni:", allAverageGrade);
+
+  container.innerHTML += `
+  <h3>Average age and grade</h3>
+  <p> The average age of all students is: ${allAverageAge.toFixed(
+    0
+  )} years old, and the average grade of all students is ${allAverageGrade.toFixed(
+    0
+  )}.</p>
+`;
 
   //Show the number of students that are over 60 and the number of students that are under 30 years old
-  const overSixtyUnderThirty = studentData.filter(
-    (students) => students.age > 60 || students.age < 30
-  );
-  // Create a list that will have the firstname lastname and city of the students that are over 30 and have an average grade of 4 and above
+
+  const overSixty = studentData.filter((student) => student.age > 60).length;
+  const underThirty = studentData.filter((student) => student.age < 30).length;
+
+  // console.log(underThirty);
+
+  container.innerHTML += `
+   <h3>Number of students over 60 and under 30</h3>
+   <p> THe number of students over 60 is: ${overSixty}, but the number of students under 30 is: ${underThirty}.</p>
+`;
+
+  // 3. Create a list that will have the firstname lastname and city of the students that are over 30 and have an average grade of 4 and above
   const longList = studentData
-    .filter((students) => {
-      return students.age > 30 && students.averageGrade >= 4;
+    .filter((student) => {
+      return student.age > 30 && student.averageGrade >= 4;
     })
-    .map((students) => ({
-      firstName: students.firstName,
-      lastName: students.lastName,
-      city: students.city,
-    }));
+    .map(
+      (student) =>
+        `<li>${student.firstName} ${student.lastName} from ${student.city}</li>`
+    )
+    .join("");
 
-  //Find the student named Arthur Cadore and display all of his information
+  console.log(longList);
+
+  container.innerHTML += `
+  <h3>Students with a grade above or equal to 4</h3>
+  <ol>${longList}</ol>
+
+  `;
+  // 4. Find the student named Arthur Cadore and display all of his information
+
   const findArthur = studentData.find(
-    (students) =>
-      students.firstName === "Arthur" && students.lastName === "Cadore"
+    (student) => student.firstName === "Arthur" && student.lastName === "Cadore"
   );
-  //Find the oldest and youngest student and display their information on the screen
-  const findYoungest = studentData.reduce((youngest, currentStudent) => {
-    return currentStudent.age < youngest.age ? currentStudent : youngest;
-  }, studentData[0]);
+  console.log(findArthur);
+  container.innerHTML += `<h3>Arthur Cadore</h3>`;
+  if (findArthur) {
+    container.innerHTML += makeStudentHtml(findArthur);
+  } else {
+    container.innerHTML += `<h4>Arthur Cadore was not found! TRY AGAIN</h4>`;
+  }
 
-  //come back for this one
-
-  //Show a list of the full names of students that have a last name longer than 8 characters
-  const lastNameLongerThanEight = studentData.filter(
-    (student) => student.lastName.length > 8
+  // 5. Find the oldest and youngest student and display their information on the screen
+  const copyList = studentData.sort(
+    (stuOne, stuTwo) => stuOne.age - stuTwo.age
   );
-  //Show a list of the top 10 best students by average grade
-  const copyList = studentData
-    .map((students) => students)
-    .sort((a, b) => a.averageGrade - b.averageGrade);
-  const topBest = copyList.slice(0, 10);
-  //Show on the screen if some users have an average grade of 1 or if all users are adults ( above 18)
+  const youngest = copyList[0];
+  const oldest = copyList[studentData.length - 1];
+  console.log(copyList);
+  container.innerHTML += `
+<h3>Youngest/Oldest</h3>
+        <h5>The oldest is:</h5>
+        ${makeStudentHtml(oldest)}
+        <h5>The youngest is:</h5>
+        ${makeStudentHtml(youngest)}
+`;
 
-  const someUsers = studentData.some((students) => students.averageGrade === 1);
-  const allUSers = studentData.every((students) => students.age >= 18);
+  // 6. Show a list of the full names of students that have a last name longer than 8 characters
 
-  console.log(
-    overSixtyUnderThirty,
-    longList,
-    findArthur,
-    findYoungest,
-    lastNameLongerThanEight,
-    topBest,
-    someUsers,
-    allUSers
-  );
-};
-
-const renderStudentsList = (containerEl, ...studentsInfo) => {
-  console.log("render students called?");
-  let studentsHTML = "";
-
-  for (let studentsData of studentsInfo) {
-    for (let student of studentsData) {
-      studentsHTML += `<div>
-      <ol>
-          <li> <b>FIRST AND LAST NAME:</b> ${student.firstName} ${student.lastName}</li>
-          <li> <b>ID:</b> ${student.id}</li>
-          <li> <b>AGE:</b> ${student.age}</li>
-          <li> <b>GENDER</b>: ${student.gender}</li>
-          <li> <b>AVERAGE GRADE:</b>${student.averageGrade}</li>
-          <li> <b>CITY: </b> ${student.city}</li>
-          <li> <b>EMAIL:</b> ${student.email}</li>
-      </ol>
-      </div>
+  container.innerHTML += `
+    <h3>Students with long names</h3>
+    <ul>
+    ${studentData
+      .filter((student) => student.lastName.length > 8)
+      .map((student) => `<li>${student.firstName} ${student.lastName}</li>`)
+      .join("")}
+      </ul>
       `;
-    }
+
+  // 7. Show a list of the top 10 best students by average grade
+  const studentsCopyTwo = [...studentData].sort(
+    (a, b) => b.averageGrade - a.averageGrade
+  );
+
+  container.innerHTML += `
+        <h3>Top Ten Students</h3>
+        ${studentsCopyTwo
+          .slice(0, 10)
+          .map((student) => makeStudentHtml(student))
+          .join("")}
+    `;
+
+  // 8. Show on the screen if some users have an average grade of 1 or if all users are adults ( above 18)
+  container.innerHTML += `
+  <h5>Do some students have an average grade of 1?</h5>
+  <p> ${
+    studentData.some((student) => student.averageGrade === 1) ? "YES" : "NO"
   }
-
-  containerEl.innerHTML = studentsHTML;
-
-  renderStudentsList(container, ...studentsInfo);
+  </p>
+  <h5>Are all students adults?</h5>
+  <p>  ${studentData.every((student) => student.age > 18) ? "YES" : "NO"}
+`;
 };
 
-const rendering = async () => {
+const listaNaStudenti = async () => {
   try {
-    await fetchStudentsList();
-  } catch (error) {
-    console.log("u caught an error");
-  }
+    const students = await fetchStudents(STUDENTS_URL);
+
+    renderStudentInfo(containerEl, students);
+  } catch (error) {}
 };
 
-rendering();
+listaNaStudenti();
