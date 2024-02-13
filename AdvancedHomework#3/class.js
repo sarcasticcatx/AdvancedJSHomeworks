@@ -110,22 +110,22 @@ class Student {
       this.academy instanceof Academy &&
       this.academy.subjects.some(
         (subjects) => subjects.title === novSubject.title
-      ) // neshto mi kochi ovde
+      )
     ) {
       if (!this.completedSubjects.includes(novSubject.title)) {
         this.completedSubjects.push(novSubject.title);
+      } else {
+        this.currentSubject = novSubject;
+        console.log(`Completed subject: ${novSubject.title}`);
       }
-      this.currentSubject = novSubject;
-      console.log(`Completed subject: ${novSubject.title}`);
     } else {
       console.error("Predmetot ne postoi");
     }
   }
 }
 
-// const potions = new Subject("Potionology", true, null, []);
-// const akademija = new Academy("Alfea", [potions]);
-// const stuDent = new Student("Tecna", "Fairy of Technology");
+const potions = new Subject("Philosophy");
+const akademija = new Academy("Alfea");
+const stuDent = new Student("Tecna", "Fairy of Technology");
 // stuDent.startAcademy(akademija);
-// stuDent.startSubject(potions);
-// console.log(stuDent.currentSubject);
+stuDent.startSubject(potions);
